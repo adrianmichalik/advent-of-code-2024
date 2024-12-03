@@ -29,9 +29,32 @@ def multiply(instruction: str) -> int:
 
 
 def part_two():
-    return None
+    doable_instructions = []
+    text = ""
+    with open('input.txt', 'r') as file:
+        for line in file:
+            text += line
+    text = text.replace("\n", "").replace("\r", "")
+    print(text)
+    doable_instructions.extend(find_all_doable_instructions(text))
+    print(doable_instructions)
+    result = 0
+    for instruction in doable_instructions:
+        result += multiply(instruction)
+    print(f"doable instructions result is {result}")
+
+
+def find_all_doable_instructions(text: str) -> list[str]:
+    matches = []
+    pattern = r"do\([^)]*\)((?:(?!don't\().)*?mul\(\d{1,3},\d{1,3}\))+"
+    tmp_matches = re.finditer(pattern, text)
+    for match in tmp_matches:
+        group = match.group(0)
+        matches.extend(re.findall(r"mul\(\d{1,3},\d{1,3}\)", group))
+    print(matches)
+    return matches
 
 
 if __name__=="__main__":
     part_one()
-    # part_two()
+    part_two()
