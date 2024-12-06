@@ -71,44 +71,39 @@ def part_one():
     return simulate_guard(grid)
 
 
-def simulate_grid_with_fake_obstacles(guards_path, original_grid):
+def simulate_grid_with_fake_obstacles(original_grid):
     # probuje w kazdym kolejnym punkcie ustawic przeszkode i zobaczyc czy kiedys guard wyjdzie
-    cycles = 0
-    for i in range(len(guards_path) - 1):
-        print("next iteration")
-        next_visited_spot_x, next_visited_spot_y = guards_path[i + 1]
-        if next_visited_spot_x > len(guards_path[0]) or next_visited_spot_y > len(guards_path):
-            continue
-        tmp_grid = copy.deepcopy(original_grid)
-        tmp_grid[next_visited_spot_y][next_visited_spot_x] = "#"
-
-        steps_max = 100000
-        steps_made = 0
-        guard_in_the_grid = True
-        x, y, direction = find_guard(tmp_grid)
-        guard = Guard(x, y, direction)
-        while steps_made < steps_max and guard_in_the_grid:
-            print(f"steps_made {steps_made}")
-            guard_in_the_grid = guard.move(tmp_grid)
-            if not guard_in_the_grid:
+    guard_did_not_leave_map = 0
+    for i in range(len(original_grid) - 1):
+        for j in range(len(original_grid[0])):
+            x, y, direction = find_guard(original_grid)
+            if i == x and j == y:
                 continue
-            steps_made += 1
-        if steps_made == steps_max and guard_in_the_grid:
-            print(f"{next_visited_spot_x}, {next_visited_spot_y}")
-            cycles += 1
-        print(f"number of cycles: {cycles}")
+            tmp_grid = copy.deepcopy(original_grid)
+            tmp_grid[j][i] = "#"
+            guard = Guard(x, y, direction)
+            guard_in_the_grid = True
+            steps = 0
+            max_steps = 10000
+            while guard_in_the_grid and steps < max_steps:
+                steps += 1
+                guard_in_the_grid = guard.move(tmp_grid)
+            if guard_in_the_grid:
+                print("guard stayed in map")
+                guard_did_not_leave_map += 1
+    print(f"guard did not leave map count: {guard_did_not_leave_map}")
 
 
-def part_two(guards_path, original_grid):
-    simulate_grid_with_fake_obstacles(guards_path, original_grid)
+def part_two(original_grid):
+    simulate_grid_with_fake_obstacles(original_grid)
 
 
 def load_grid():
-    with open('example.txt', 'r') as f:
+    with open('input.txt', 'r') as f:
         grid = [list(line.strip()) for line in f.readlines()]
     return grid
 
 
 if __name__=="__main__":
     guards_path = part_one()
-    part_two(guards_path, load_grid())
+    part_two(load_grid())
