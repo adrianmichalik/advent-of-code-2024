@@ -1,4 +1,4 @@
-from itertools import chain, combinations, permutations, product
+from itertools import product
 
 
 class Operation:
