@@ -1,5 +1,5 @@
-import math
 import re
+from sympy import symbols, Eq, solve
 
 
 class Point:
@@ -49,6 +49,55 @@ def parse_input_file():
     return results
 
 
+def parse_input_file_pt2():
+    button_pattern = re.compile(r"Button (A|B): X\+([0-9]+), Y\+([0-9]+)")
+    prize_pattern = re.compile(r"Prize: X=([0-9]+), Y=([0-9]+)")
+
+    with open('input.txt', 'r') as file:
+        lines = file.read().strip().split('\n\n')
+
+    results = []
+    for block in lines:
+        button_a, button_b, prize = None, None, None
+        for line in block.split('\n'):
+            button_match = button_pattern.match(line)
+            if button_match:
+                button = Point(int(button_match.group(2)), int(button_match.group(3)))
+                if button_match.group(1) == 'A':
+                    button_a = button
+                elif button_match.group(1) == 'B':
+                    button_b = button
+
+            prize_match = prize_pattern.match(line)
+            if prize_match:
+                prize = Point(int(prize_match.group(1)) + 10000000000000, int(prize_match.group(2)) + 10000000000000)
+
+        results.append(InputData(button_a, button_b, prize))
+
+    return results
+
+
+def solve_equations(a1, b1, c1, a2, b2, c2):
+    n, m = symbols('n m')
+
+    eq1 = Eq(a1 * n + b1 * m, c1)
+    eq2 = Eq(a2 * n + b2 * m, c2)
+
+    solution = solve((eq1, eq2), (n, m))
+
+    if solution:
+        n_value = solution[n]
+        m_value = solution[m]
+        print(f"Solved: n = {n_value}, m = {m_value}")
+
+        if n_value.is_integer and m_value.is_integer:
+            return n_value, m_value
+        else:
+            return None
+    else:
+        return None
+
+
 def part_one():
     data = parse_input_file()
 
@@ -80,9 +129,16 @@ def part_one():
 
 
 def part_two():
-    print("")
+    data = parse_input_file_pt2()
+
+    tokens_total = 0
+    for entry in data:
+        result = solve_equations(entry.button_a.x, entry.button_b.x, entry.prize.x, entry.button_a.y, entry.button_b.y, entry.prize.y)
+        if result is not None:
+            tokens_total += 3 * result[0] + result[1]
+    print(tokens_total)
 
 
 if __name__ == "__main__":
-    part_one()
+    # part_one()
     part_two()
